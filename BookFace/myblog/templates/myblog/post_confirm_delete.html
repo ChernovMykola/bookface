@@ -1,0 +1,8 @@
+{% extends "myblog/base.html" %}
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <p>You sure that you want to delete {{ object }}?</p>
+        <input type="sumbit" class="btn btn-danger" value="delete">
+    </form>
+{% endblock %}
