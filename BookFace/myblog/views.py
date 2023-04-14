@@ -1,10 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.urls import reverse
+
 from django.views.generic import (TemplateView, ListView, DeleteView, CreateView, UpdateView, DetailView)
-from myblog.models import Post, Comment
+from myblog.models import Post, Comment, UserProfileInfo, User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from myblog.forms import PostForm, CommentForm
+from myblog.forms import PostForm, CommentForm, UserForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseRedirect , HttpResponse
+
+
 
 
 
@@ -25,13 +31,20 @@ def get_queryset(request):
         return redirect('accounts/login')
 
 
-def list_post(request):
+def post_list(request):
     if request.user.is_authenticated:
         posts = Post.objects.filter(author=request.user, published_date__isnull = False)
         return render(request, 'myblog/post_list.html', {'posts': posts})
     else:
         return redirect('accounts/login')
 
+def wall(request):
+    if request.user.is_authenticated:
+        posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+        context = {'posts': posts}
+        return render(request, 'myblog/wall.html', context)
+    else:
+        return render(request, 'myblog/login.html')
 
 
 
@@ -40,20 +53,23 @@ def list_post(request):
     #     return Post.objects.filter(published_date__lte = timezone.now()).order_by('published_date'), 
 
 
-class PostDetailView(DetailView):
-    model = Post
+def post_detail(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    return render(request, 'post_detail.html', {'post': post})
 
 class CreatePostView(LoginRequiredMixin, CreateView):
     login_url = '/login/'
-    redirect_field_name = 'myblog/post_detail.html'
+    redirect_field_name = 'myblog/post_detail'
     form_class = PostForm
     model = Post
+
     def form_valid(self, form):
         form.instance.author = self.request.user
         picture = form.cleaned_data['picture']
         if picture:
             form.instance.picture = picture
         return super().form_valid(form)
+
     
 
 
@@ -90,7 +106,8 @@ def deletepost(request, pk):
 #     model = Post
 
 
-
+def registration():
+    return 
     
 
     
@@ -98,7 +115,7 @@ def deletepost(request, pk):
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.publish()
-    return redirect('post_detail', pk=pk )
+    return redirect('myblog/post_detail', pk=pk )
 
 @login_required
 def add_comment_to_post(request, pk):
@@ -106,23 +123,71 @@ def add_comment_to_post(request, pk):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            comment = form.save(commit=False)
+            comment = form.save(commit=False)  # Change commit argument to True
             comment.post = post
+            comment.author = request.user
             comment.save()
-            return redirect('post_detail', pk = post.pk)
+            previous_page_url = request.session.get('previous_page_url', '/')
+            return redirect(previous_page_url)
     else:
-        form = CommentForm()
-        return render(request,'myblog/comment_form.html',{'form':form}) 
+        form = CommentForm() 
+    request.session['previous_page_url'] = request.META.get('HTTP_REFERER', '/')
+    return render(request,'myblog/comment_form.html',{'form':form})
     
-@login_required
-def comment_approve(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    comment.approve()
-    return redirect('post_detail', pk=comment.post.pk)
+# @login_required
+# def comment_approve(request, pk):
+#     comment = get_object_or_404(Comment, pk=pk)
+#     comment.approve()
+#     return redirect('post_detail', pk=comment.post.pk)
 
-@login_required
-def comment_remove(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    post_pk = comment.post.pk
-    comment.delete()
-    return redirect('post_detail', pk=post_pk)
+# @login_required
+# def comment_remove(request, pk):
+#     comment = get_object_or_404(Comment, pk=pk)
+#     post_pk = comment.post.pk
+#     comment.delete()
+#     return redirect('post_detail', pk=post_pk)
+
+def registration(request):
+
+    registered = False
+
+    if request.method ==  "POST":
+        user_form = UserForm(data=request.POST)
+
+        if user_form.is_valid():
+            user = user_form.save()
+            user.set_password(user.password)
+            user.save()
+
+            registered = True
+        else:
+            print(user_form.errors,)
+
+    else:
+        user_form = UserForm()
+
+
+    return render(request, 'myblog/registration.html',{'user_form':user_form, 'registered':registered})
+
+def user_login(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            if user.is_active:
+                login(request, user)
+                return HttpResponseRedirect(reverse('myblog:post_list'))
+            
+            else:
+                return HttpResponse("ACCOUNT IS NOT ACTIVE")
+        else:
+            print("Someone tried to login and failed!")
+            print("Username: {} and password: {}".format(username, password))
+            return render(request, 'myblog/user_login.html',{})
+        # HttpResponse("Invalid login details! supplied!")
+    else:
+        return render(request, 'myblog/user_login.html',{})

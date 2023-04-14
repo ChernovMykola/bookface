@@ -1,0 +1,41 @@
+.techfont{
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.bigbranf{
+    font-size: 1.5em;
+}
+
+.centerstage{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.postdate{
+    text-align: center;
+}
+
+.posttitle{
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 3em;
+    text-align: center;
+}
+
+.postontent{
+    font-size: 1.5em;
+}
+
+.btn-comment{
+    position: absolute;
+    right: 0px;
+}
+
+.myblog_page{
+    height: 10em;
+    width: 10em;
+    margin: 1em;
+}
+
+
