@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.urls import reverse
-
+from django.db import IntegrityError
 from django.views.generic import (TemplateView, ListView, DeleteView, CreateView, UpdateView, DetailView)
 from myblog.models import Post, Comment, UserProfileInfo, User
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +9,9 @@ from myblog.forms import PostForm, CommentForm, UserForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect , HttpResponse
+from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
+
 
 
 
@@ -90,7 +93,7 @@ def deletepost(request, pk):
             post.delete()
         else:
             return redirect('accounts/login')
-        return redirect('post_list')
+        return redirect('myblog:post_list')
     else:
         return redirect('accounts/login')
 
@@ -106,8 +109,6 @@ def deletepost(request, pk):
 #     model = Post
 
 
-def registration():
-    return 
     
 
     
@@ -115,7 +116,7 @@ def registration():
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.publish()
-    return redirect('myblog/post_detail', pk=pk )
+    return redirect('myblog:post_detail', pk=pk )
 
 @login_required
 def add_comment_to_post(request, pk):
@@ -147,27 +148,39 @@ def add_comment_to_post(request, pk):
 #     comment.delete()
 #     return redirect('post_detail', pk=post_pk)
 
+
 def registration(request):
-
     registered = False
-
-    if request.method ==  "POST":
-        user_form = UserForm(data=request.POST)
-
+    if request.method == 'POST':
+        user_form = UserForm(data=request.POST,  files=request.FILES)
         if user_form.is_valid():
-            user = user_form.save()
-            user.set_password(user.password)
-            user.save()
-
-            registered = True
+            username = user_form.cleaned_data.get('username')
+            email = user_form.cleaned_data.get('email')
+            password = user_form.cleaned_data.get('password')
+            confirm_password = user_form.cleaned_data.get('confirm_password')
+            email_exists = User.objects.filter(email=email).exists()
+            if password != confirm_password:
+                user_form.add_error('username', f'Check your password please!')
+            elif email_exists:
+                user_form.add_error('email', f'This email is already registered.')
+            else:
+                try:
+                    user = User.objects.create_user(username=username, email=email, password=password)
+                    user.set_password(password)  # Hash the password for UserProfileInfo
+                    user.save()
+                    registered = True
+                except IntegrityError as e:
+                    user_form.add_error('username', f'Username {username} already exists. Please choose another username.')
         else:
-            print(user_form.errors,)
-
+            print(user_form.errors)
     else:
         user_form = UserForm()
 
+    return render(request, 'myblog/registration.html', {'user_form': user_form, 'registered': registered})
 
-    return render(request, 'myblog/registration.html',{'user_form':user_form, 'registered':registered})
+
+
+
 
 def user_login(request):
 

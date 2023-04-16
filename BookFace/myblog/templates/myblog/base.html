@@ -25,6 +25,7 @@
                 <li><a  href="{% url 'logout' %}">Logout</a></li>
                 <li><a href="{% url 'myblog:wall' %}">Wall</a></li>
                 <li><a>WELCOME {{user.username}}</a></li>
+                
                 {% else %}
                 <li><a class="nav navbar-right" href="{% url 'myblog:user_login' %}">Login</a></li>
                 <li><a class="nav navbar-right" href="{% url 'myblog:registration' %}">Registration</a></li>

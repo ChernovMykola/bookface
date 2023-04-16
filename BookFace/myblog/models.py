@@ -7,10 +7,12 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class UserProfileInfo(models.Model):
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE) 
-
-    profile_picture = models.ImageField(upload_to='profile_pics', blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
+    username = models.CharField(max_length=200, default='')
+    email = models.EmailField(max_length=254, default='')
+    # profile_picture = models.ImageField(upload_to='media/account_picture', blank=True)
+    password = models.CharField(max_length=200, default='')
+    confirm_password = models.CharField(max_length=200, default='')
 
     def __str__(self):
         return self.user.username
@@ -31,7 +33,7 @@ class Post(models.Model):
         return self.comments.filter(approved_comment=True)
     
     def get_absolute_url(self):
-        return reverse("post_detail", kwargs={'pk':self.pk})
+        return reverse("myblog:post_detail", kwargs={'pk':self.pk})
 
     def __str__(self):
         return self.title 
