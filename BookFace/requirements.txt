@@ -1,0 +1,10 @@
+argon2==0.1.10
+asgiref @ file:///Users/ec2-user/ci_py311/asgiref_1678390266874/work
+bcrypt==4.0.1
+certifi @ file:///Users/ec2-user/ci_py311/certifi_1678321191472/work/certifi
+Django @ file:///Users/ec2-user/ci_py311/django_1678411010555/work
+Faker==18.3.1
+Pillow==9.5.0
+python-dateutil==2.8.2
+six==1.16.0
+sqlparse @ file:///Users/ec2-user/ci_py311/sqlparse_1678394278812/work
