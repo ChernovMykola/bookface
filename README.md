@@ -1,6 +1,6 @@
 # BookFace
 It is blog, where you can publish your posts
-### [Author:](https://chernovmykola.github.io/cookie-clicker.github.io/)
+### [Author:](https://github.com/ChernovMykola)
 
 ### [It is link for start!](http://mykolachernov.pythonanywhere.com/accounts/login/)
 ### You can registration and login in the relevant page.
