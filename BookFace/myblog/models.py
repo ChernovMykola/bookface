@@ -10,12 +10,12 @@ class UserProfileInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
     username = models.CharField(max_length=200, default='')
     email = models.EmailField(max_length=254, default='')
-    # profile_picture = models.ImageField(upload_to='media/account_picture', blank=True)
     password = models.CharField(max_length=200, default='')
     confirm_password = models.CharField(max_length=200, default='')
 
-    def __str__(self):
-        return self.user.username
+    def __str__(self) -> str:
+        return self.user.username or None
+
 
 class Post(models.Model):
     author = models.ForeignKey('auth.User', on_delete=models.CASCADE)
