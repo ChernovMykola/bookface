@@ -67,14 +67,24 @@ class AllPost(ListView):
         qs = Post.objects.filter(author=self.request.user)
         return qs
 
-def wall(request):
-    if request.user.is_authenticated:
-        posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-        context = {'posts': posts}
-        return render(request, 'myblog/wall.html', context)
-    else:
-        return render(request, 'myblog/login.html')
+# def wall(request):
+#     if request.user.is_authenticated:
+#         posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+#         context = {'posts': posts}
+#         return render(request, 'myblog/wall.html', context)
+#     else:
+#         return render(request, 'myblog/login.html')
 
+
+class Wall(ListView):
+    model = Post
+    template_name = 'myblog/wall.html'
+    def get_queryset(self):
+        post = Post.objects.all()
+        if not self.request.user.is_authenticated():
+            return redirect('accounts/login')
+        return post
+    
 
 
 
@@ -225,6 +235,7 @@ def user_login(request):
             print("Someone tried to login and failed!")
             print("Username: {} and password: {}".format(username, password))
             return render(request, 'myblog/user_login.html',{})
+            
         # HttpResponse("Invalid login details! supplied!")
     else:
         return render(request, 'myblog/user_login.html',{})
