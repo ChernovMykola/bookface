@@ -1,14 +1,40 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import (
+    render, 
+    get_object_or_404, 
+    redirect
+)
 from django.utils import timezone
 from django.urls import reverse
 from django.db import IntegrityError
-from django.views.generic import (TemplateView, ListView, DeleteView, CreateView, UpdateView, DetailView)
-from myblog.models import Post, Comment, UserProfileInfo, User
+from django.views.generic import (
+    TemplateView,
+    ListView,
+    DeleteView, 
+    CreateView, 
+    UpdateView, 
+    DetailView
+)
+from myblog.models import (
+    Post, 
+    Comment, 
+    UserProfileInfo, 
+    User
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
-from myblog.forms import PostForm, CommentForm, UserForm
+from myblog.forms import (
+    PostForm, 
+    CommentForm, 
+    UserForm
+)
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponseRedirect , HttpResponse
+from django.contrib.auth import (
+    authenticate, 
+    login
+)
+from django.http import (
+    HttpResponseRedirect, 
+    HttpResponse
+)
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 
@@ -18,7 +44,7 @@ from django.db.utils import IntegrityError
 
 
 from django.urls import reverse_lazy
-# Create your views here.
+
 
 
 
@@ -33,13 +59,13 @@ def get_queryset(request):
     else:
         return redirect('accounts/login')
 
-
-def post_list(request):
-    if request.user.is_authenticated:
-        posts = Post.objects.filter(author=request.user, published_date__isnull = False)
-        return render(request, 'myblog/post_list.html', {'posts': posts})
-    else:
-        return redirect('accounts/login')
+    
+class AllPost(ListView):
+    model = Post
+    template_name = 'myblog/post_list.html'
+    def get_queryset(self):
+        qs = Post.objects.filter(author=self.request.user)
+        return qs
 
 def wall(request):
     if request.user.is_authenticated:
@@ -52,8 +78,6 @@ def wall(request):
 
 
 
-    # def get_queryset(self,):
-    #     return Post.objects.filter(published_date__lte = timezone.now()).order_by('published_date'), 
 
 
 def post_detail(request, pk):

@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 app_name = 'myblog'
 urlpatterns = [
     re_path(r'about/$', views.AboutView.as_view(), name='about' ),
-    re_path(r'$',views.post_list, name='post_list'),
+    re_path(r'$',views.AllPost.as_view(), name='post_list'),
     re_path(r'post/(?P<pk>\d+)/$', views.post_detail, name='post_detail'),
     re_path(r'post/new/$', views.CreatePostView.as_view(), name='post_new'),
     re_path(r'post/(?P<pk>\d+)/edit/$', views.PostUpdateView.as_view(), name='post_edit'),
