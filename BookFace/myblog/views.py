@@ -52,13 +52,19 @@ from django.urls import reverse_lazy
 class AboutView(TemplateView):
     template_name = 'about.html'
 
+class PostDraftList(ListView):
+    model = Post
+    paginate_by = 5
+    context_object_name = 'post'
+    template_name = 'myblog/post_draft_list.html'
 
-def get_queryset(request):
-    if request.user.is_authenticated:
-        posts = Post.objects.filter(author=request.user, published_date__isnull = True).order_by('create_date')
-        return render(request, 'myblog/post_list.html', {'posts': posts})
-    else:
-        return redirect('accounts/login')
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            posts = Post.objects.filter(author=self.request.user, published_date__isnull=True).order_by('create_date')
+            return posts
+        else:
+            posts = Post.objects.none()
+            return posts
 
     
 class AllPost(ListView):
