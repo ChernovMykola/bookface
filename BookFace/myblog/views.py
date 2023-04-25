@@ -66,9 +66,14 @@ class AllPost(ListView):
     paginate_by = 5
     context_object_name = 'post'
     template_name = 'myblog/post_list.html'
+
     def get_queryset(self):
-        qs = Post.objects.filter(author=self.request.user)
-        return qs
+        if self.request.user.is_authenticated:
+            posts = Post.objects.filter(author=self.request.user)
+        else:
+            posts = Post.objects.none()
+
+        return posts
 
 # def wall(request):
 #     if request.user.is_authenticated:
