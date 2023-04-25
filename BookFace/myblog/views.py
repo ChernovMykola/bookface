@@ -64,6 +64,7 @@ def get_queryset(request):
 class AllPost(ListView):
     model = Post
     paginate_by = 5
+    context_object_name = 'post'
     template_name = 'myblog/post_list.html'
     def get_queryset(self):
         qs = Post.objects.filter(author=self.request.user)
@@ -81,6 +82,7 @@ class AllPost(ListView):
 class Wall(ListView):
     model = Post
     template_name = 'myblog/wall.html'
+    context_object_name = 'post'
     paginate_by = 5
     def get_queryset(self):
         post = Post.objects.all()

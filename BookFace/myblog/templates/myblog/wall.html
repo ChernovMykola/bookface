@@ -3,7 +3,7 @@
 
 <div class="centerstage">
     {% if user.is_authenticated %}
-        {% for post in posts %}
+        {% for post in post %}
                 <div class="post">
                     <h1>{{ post.title }}</h1>
                     {% if post.picture %}
