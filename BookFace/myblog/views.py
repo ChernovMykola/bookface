@@ -81,7 +81,7 @@ class Wall(ListView):
     template_name = 'myblog/wall.html'
     def get_queryset(self):
         post = Post.objects.all()
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return redirect('accounts/login')
         return post
     
