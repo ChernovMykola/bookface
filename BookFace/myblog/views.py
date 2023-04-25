@@ -3,6 +3,7 @@ from django.shortcuts import (
     get_object_or_404, 
     redirect
 )
+from django.core.paginator import Paginator
 from django.utils import timezone
 from django.urls import reverse
 from django.db import IntegrityError
@@ -62,6 +63,7 @@ def get_queryset(request):
     
 class AllPost(ListView):
     model = Post
+    paginate_by = 5
     template_name = 'myblog/post_list.html'
     def get_queryset(self):
         qs = Post.objects.filter(author=self.request.user)
@@ -79,6 +81,7 @@ class AllPost(ListView):
 class Wall(ListView):
     model = Post
     template_name = 'myblog/wall.html'
+    paginate_by = 5
     def get_queryset(self):
         post = Post.objects.all()
         if not self.request.user.is_authenticated:
@@ -134,8 +137,7 @@ def deletepost(request, pk):
     
     
     
-# model = Post
-# success_url = reverse_lazy('post_list')
+
 
 # class DraftListView(LoginRequiredMixin, ListView):
 #     login_url = '/login/'
