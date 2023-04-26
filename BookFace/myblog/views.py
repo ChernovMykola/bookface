@@ -104,11 +104,12 @@ class Wall(ListView):
 
 
 
+class PostDetail(DetailView):
+    model = Post
+    template_name = 'myblog/post_detail.html'
+    context_object_name = 'post'
+    
 
-
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, 'post_detail.html', {'post': post})
 
 class CreatePostView(LoginRequiredMixin, CreateView):
     login_url = '/login/'
