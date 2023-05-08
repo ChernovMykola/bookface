@@ -1,6 +1,9 @@
-from django import forms
-from myblog.models import Post, Comment, UserProfileInfo
+ from django import forms
+
 from django.contrib.auth.forms import UserCreationForm
+
+from myblog.models import Comment, Post, UserProfileInfo
+
 
 class UserForm(forms.ModelForm):
     email = forms.EmailField(required=True)

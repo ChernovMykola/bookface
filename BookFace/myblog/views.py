@@ -1,51 +1,30 @@
-from django.shortcuts import (
-    render, 
-    get_object_or_404, 
-    redirect
-)
-from django.core.paginator import Paginator
-from django.utils import timezone
-from django.urls import reverse
-from django.db import IntegrityError
-from django.views.generic import (
-    TemplateView,
-    ListView,
-    DeleteView, 
-    CreateView, 
-    UpdateView, 
-    DetailView
-)
-from myblog.models import (
-    Post, 
-    Comment, 
-    UserProfileInfo, 
-    User
-)
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    UserPassesTestMixin
-)
-from myblog.forms import (
-    PostForm, 
-    CommentForm, 
-    UserForm
-)
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import (
-    authenticate, 
-    login
-)
-from django.http import (
-    HttpResponseRedirect, 
-    HttpResponse
-)
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.db.utils import IntegrityError
-from django.urls import reverse_lazy
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+
+from myblog.forms import CommentForm, PostForm, UserForm
+from myblog.models import Comment, Post, User, UserProfileInfo
 
 
 class AboutView(TemplateView):
     template_name = 'about.html'
+
 
 class PostDraftList(ListView):
     model = Post
@@ -55,13 +34,15 @@ class PostDraftList(ListView):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            posts = Post.objects.filter(author=self.request.user, published_date__isnull=True).order_by('create_date')
+            posts = Post.objects.filter(
+                author=self.request.user, published_date__isnull=True
+            ).order_by('create_date')
             return posts
         else:
             posts = Post.objects.none()
             return posts
 
-    
+
 class AllPost(ListView):
     model = Post
     paginate_by = 5
@@ -81,6 +62,7 @@ class Wall(ListView):
     template_name = 'myblog/wall.html'
     context_object_name = 'post'
     paginate_by = 5
+
     def get_queryset(self):
         post = Post.objects.all()
         if not self.request.user.is_authenticated:
@@ -92,7 +74,7 @@ class PostDetail(DetailView):
     model = Post
     template_name = 'myblog/post_detail.html'
     context_object_name = 'post'
-    
+
 
 class CreatePostView(LoginRequiredMixin, CreateView):
     login_url = '/login/'
@@ -107,14 +89,14 @@ class CreatePostView(LoginRequiredMixin, CreateView):
             form.instance.picture = picture
         return super().form_valid(form)
 
-    
+
 class PostUpdateView(LoginRequiredMixin, UpdateView):
     login_url = '/login/'
     redirect_field_name = 'myblog/post_detail.html'
     model = Post
     form_class = PostForm
 
-  
+
 class DeletePostView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     success_url = reverse_lazy('myblog:post_list')
@@ -122,13 +104,13 @@ class DeletePostView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
-    
-    
+
+
 @login_required
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.publish()
-    return redirect('myblog:post_detail', pk=pk )
+    return redirect('myblog:post_detail', pk=pk)
 
 
 @login_required
@@ -137,22 +119,24 @@ def add_comment_to_post(request, pk):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            comment = form.save(commit=False) 
+            comment = form.save(commit=False)
             comment.post = post
             comment.author = request.user
             comment.save()
             previous_page_url = request.session.get('previous_page_url', '/')
             return redirect(previous_page_url)
     else:
-        form = CommentForm() 
-    request.session['previous_page_url'] = request.META.get('HTTP_REFERER', '/')
-    return render(request,'myblog/comment_form.html',{'form':form})
+        form = CommentForm()
+    request.session['previous_page_url'] = request.META.get(
+        'HTTP_REFERER', '/'
+    )
+    return render(request, 'myblog/comment_form.html', {'form': form})
 
 
 def registration(request):
     registered = False
     if request.method == 'POST':
-        user_form = UserForm(data=request.POST,  files=request.FILES)
+        user_form = UserForm(data=request.POST, files=request.FILES)
         if user_form.is_valid():
             username = user_form.cleaned_data.get('username')
             email = user_form.cleaned_data.get('email')
@@ -162,24 +146,36 @@ def registration(request):
             if password != confirm_password:
                 user_form.add_error('username', f'Check your password please!')
             elif email_exists:
-                user_form.add_error('email', f'This email is already registered.')
+                user_form.add_error(
+                    'email', f'This email is already registered.'
+                )
             else:
                 try:
-                    user = User.objects.create_user(username=username, email=email, password=password)
-                    user.set_password(password)  # Hash the password for UserProfileInfo
+                    user = User.objects.create_user(
+                        username=username, email=email, password=password
+                    )
+                    user.set_password(
+                        password
+                    )  # Hash the password for UserProfileInfo
                     user.save()
                     registered = True
                 except IntegrityError as e:
-                    user_form.add_error('username', f'Username {username} already exists. Please choose another username.')
+                    user_form.add_error(
+                        'username',
+                        f'Username {username} already exists. Please choose another username.',
+                    )
         else:
             print(user_form.errors)
     else:
         user_form = UserForm()
-    return render(request, 'myblog/registration.html', {'user_form': user_form, 'registered': registered})
+    return render(
+        request,
+        'myblog/registration.html',
+        {'user_form': user_form, 'registered': registered},
+    )
 
 
 def user_login(request):
-
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -190,12 +186,12 @@ def user_login(request):
             if user.is_active:
                 login(request, user)
                 return HttpResponseRedirect(reverse('myblog:post_list'))
-            
+
             else:
                 return HttpResponse("ACCOUNT IS NOT ACTIVE")
         else:
             print("Someone tried to login and failed!")
             print("Username: {} and password: {}".format(username, password))
-            return render(request, 'myblog/user_login.html',{})
+            return render(request, 'myblog/user_login.html', {})
     else:
-        return render(request, 'myblog/user_login.html',{})
+        return render(request, 'myblog/user_login.html', {})
