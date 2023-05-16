@@ -1,13 +1,27 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin, 
+    UserPassesTestMixin
+)
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.utils import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.http import (
+    HttpResponse,
+    HttpResponseRedirect
+)
+from django.shortcuts import (
+    get_object_or_404, 
+    redirect, 
+    render
+)
+from django.urls import (
+    reverse, 
+    reverse_lazy
+)
 from django.utils import timezone
 from django.views.generic import (
     CreateView,
@@ -18,8 +32,17 @@ from django.views.generic import (
     UpdateView,
 )
 
-from myblog.forms import CommentForm, PostForm, UserForm
-from myblog.models import Comment, Post, User, UserProfileInfo
+from myblog.forms import (
+    CommentForm,
+    PostForm, 
+    UserForm
+)
+from myblog.models import (
+    Comment, 
+    Post, 
+    User, 
+    UserProfileInfo
+)
 
 
 class AboutView(TemplateView):
@@ -113,24 +136,25 @@ def post_publish(request, pk):
     return redirect('myblog:post_detail', pk=pk)
 
 
-@login_required
-def add_comment_to_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-            previous_page_url = request.session.get('previous_page_url', '/')
-            return redirect(previous_page_url)
-    else:
-        form = CommentForm()
-    request.session['previous_page_url'] = request.META.get(
-        'HTTP_REFERER', '/'
-    )
-    return render(request, 'myblog/comment_form.html', {'form': form})
+@method_decorator(login_required, name='dispatch')
+class CreateCommentView(CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'myblog/comment_form.html'
+
+    def form_valid(self, form):
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.author = self.request.user
+        comment.save()
+        previous_page_url = self.request.session.get('previous_page_url', '/')
+        return redirect(previous_page_url)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['previous_page_url'] = self.request.META.get('HTTP_REFERER', '/')
+        return context
 
 
 def registration(request):
