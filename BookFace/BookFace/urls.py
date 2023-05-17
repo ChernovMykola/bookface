@@ -21,11 +21,16 @@ from django.urls import include, path, re_path
 from myblog import views
 
 urlpatterns = [
-    re_path(r'', include('myblog.urls', namespace='myblog')),
-    path('admin/', admin.site.urls),
+    re_path(r'', 
+        include('myblog.urls',
+        namespace='myblog')),
+    path('admin/', 
+        admin.site.urls),
     path(
         'logout/',
         LogoutView.as_view(next_page='/accounts/login/'),
         name='logout',
     ),
+    path('api/',
+    include('api.urls')),
 ]
