@@ -10,3 +10,7 @@ class PostSerializer(serializers.modelSerializer):
         model = Post
         fields = ['id', 'author', 'title', 'text', 'picture', 'create_day', 'published_date']
 
+class CommentSerializer(serializers.modelSerializer):
+    class Meta():
+        model = Comment 
+        fields = ['id', 'post', 'author', 'text', 'create_date', 'approved_comment']
