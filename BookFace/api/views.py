@@ -18,3 +18,10 @@ class PostList(generics.ListAPIView):
  
     def get_queryset(self):
         return Post.objects
+    
+class CommentList(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+ 
+    def get_queryset(self):
+        return Comment.objects
