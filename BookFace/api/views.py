@@ -18,6 +18,7 @@ from myblog.models import (
     Post,
     Comment
 )
+
 @csrf_exempt
 def signup(request):
     if request.method == 'POST':
