@@ -61,3 +61,10 @@ class CommentList(generics.ListAPIView):
  
     def get_queryset(self):
         return Comment.objects
+    
+class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = PostSerializer
+    permission_class = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Post.objects

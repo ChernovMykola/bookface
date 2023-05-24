@@ -10,5 +10,7 @@ urlpatterns = [
     path('signup/',
         views.signup),
     path('login/',
-        views.login)
+        views.login),
+    path('postlist/<int:pk>',
+        views.PostRetrieveUpdateDestroy.as_view()),
 ]
