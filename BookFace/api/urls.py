@@ -4,13 +4,13 @@ from . import views
 
 urlpatterns = [
     path('postlist/',
-         views.PostList.as_view()),
+views.PostList.as_view()),
     path('commentlist/',
-         views.CommentList.as_view()),
+views.CommentList.as_view()),
     path('signup/',
-        views.signup),
+views.signup),
     path('login/',
-        views.login),
+views.login),
     path('postlist/<int:pk>',
-        views.PostRetrieveUpdateDestroy.as_view()),
+views.PostRetrieveUpdateDestroy.as_view()),
 ]

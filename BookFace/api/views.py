@@ -31,6 +31,9 @@ def signup(request):
         except IntegrityError:
             return JsonResponse({'error':'That username has already been taken. Please choose a new username'},
                                 status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def login(request):
@@ -68,3 +71,13 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Post.objects
+    
+class PostListCreate(generics.ListCreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Post.objects
+
+    def perform_create(self, serializer):
+        serializer.save()
