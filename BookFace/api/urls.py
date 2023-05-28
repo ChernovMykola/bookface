@@ -13,4 +13,6 @@ views.signup),
 views.login),
     path('postlist/<int:pk>',
 views.PostRetrieveUpdateDestroy.as_view()),
+    path('commentlist/<int:pk>',
+views.CommentRetrieveUpdateDestroy.as_view()),
 ]

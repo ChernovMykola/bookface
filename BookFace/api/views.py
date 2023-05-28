@@ -71,6 +71,13 @@ class PostRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Post.objects
+
+class CommentRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+    permission_class = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects
     
 class PostListCreate(generics.ListCreateAPIView):
     serializer_class = PostSerializer
